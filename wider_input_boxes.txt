@@ -1,0 +1,58 @@
+// ==UserScript==
+// @name         Möbius Input Box Widener
+// @namespace    http://tampermonkey.net/
+// @version      3.1
+// @description  Widens inputs on Möbius assignments effectively.
+// @author       You
+// @match        https://*.mobius.cloud/*
+// @grant        GM_addStyle
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // --- CONFIGURATION ---
+    const TARGET_WIDTH = '600px';
+    // ---------------------
+
+    // 1. CSS Force
+    const css = `
+        /* Specific classes from your HTML */
+        input.blankenabled,
+        input.form-control,
+
+        /* Container targets */
+        #inner input[type="text"],
+        .questionstyle input[type="text"],
+        .response input[type="text"],
+
+        /* Catch-all for answers */
+        input[name^="ans"] {
+            width: ${TARGET_WIDTH} !important;
+            min-width: ${TARGET_WIDTH} !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+    `;
+
+    if (typeof GM_addStyle !== 'undefined') {
+        GM_addStyle(css);
+    } else {
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.append(style);
+    }
+
+    // 2. JS Interval Enforcer (Backup for late-loading elements)
+    setInterval(() => {
+        const inputs = document.querySelectorAll('#inner input[type="text"], input.blankenabled');
+
+        inputs.forEach(input => {
+            if (input.style.width !== TARGET_WIDTH) {
+                input.style.width = TARGET_WIDTH;
+            }
+        });
+    }, 1000);
+
+})();
